@@ -49,9 +49,11 @@ class Event
     if @loc =~/asher levy/i then
       return "Asher Levy 185 First Avenue, New York, New York, 10009"
     elsif @loc =~/liberty school/i then
-      return @loc #zog website doesnt have it
+      return "201 Warren Street, New York, New York, 10282"
     elsif @loc =~/anna silver/i then
       return "Anna Silver 166 ESSEX STREET, New York, New York"
+	elsif @loc =~ /adolf/i then
+	  return "440 West 53rd Street, New York, New York"
     else
       return @loc
     end
