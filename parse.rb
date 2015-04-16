@@ -4,6 +4,7 @@ require 'rubygems'
 require 'nokogiri'
 require 'date'
 require 'securerandom'
+require 'optparse'
 
 #Ubuntu Instructions:
 #  sudo apt-get install ruby
@@ -94,38 +95,6 @@ class Event
 
 end
 
-teamEvents = Array.new
-
-html_doc = Nokogiri::HTML(File.open("webpage.txt"))
-
-tables =  html_doc.css('div.myschedule table');
-
-
-tables.each { |table|
-
-  trs = table.css('tr')
-  trs.each { |tr|
-    day = tr.css('td div#dayValue')
-    if day.nil?
-      next
-    end
-    time = tr.css('td div#startDateValue').text.strip
-    loc = tr.css('td div#locationNameValue').text.strip
-    teams = tr.css('td div#teamsValue').text.strip
-
-    if not teams =~/balls to the wall/i then
-      next
-    end
-   
-    teamEvents.push(Event.new(day.text.strip, time, loc, teams ))
-
-    #puts day.text.strip + " | " + time.text.strip + " | " + loc.text.strip + " | " + teams
-  } 
-
-
-}
-
-
 
 def icalHeader()
   s = <<-ICAL
@@ -146,6 +115,59 @@ def icalFooter()
   ICAL
   return s.gsub(/^\s*/, "")
 end
+
+
+
+options = {}
+p = OptionParser.new  {|opts|
+	opts.banner = "Usage: #{$0} -t TEAMNAME"
+	opts.on('-t', '--team TEAMNAME', "Team name") {|t| options[:team] = t }
+}
+
+p.parse!
+
+if !options.include?(:team) then
+	puts p;
+	exit;
+end
+
+team_name = options[:team]
+
+teamEvents = Array.new
+
+html_doc = Nokogiri::HTML(File.open("webpage.txt"))
+
+tables =  html_doc.css('div.myschedule table');
+
+
+
+tables.each { |table|
+
+  trs = table.css('tr')
+  trs.each { |tr|
+    day = tr.css('td div#dayValue')
+    if day.nil?
+      next
+    end
+    time = tr.css('td div#startDateValue').text.strip
+    loc = tr.css('td div#locationNameValue').text.strip
+    teams = tr.css('td div#teamsValue').text.strip
+
+    if not teams =~/#{team_name}/i then
+      next
+    end
+   
+    teamEvents.push(Event.new(day.text.strip, time, loc, teams ))
+
+    #puts day.text.strip + " | " + time.text.strip + " | " + loc.text.strip + " | " + teams
+  } 
+
+
+}
+
+
+
+
 
 
 
